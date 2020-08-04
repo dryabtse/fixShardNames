@@ -206,7 +206,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
         executionResults.push(res);
       });
 
-      printjson({"Execution results": executionResults, "ok": 1});
+      printjson({"dryRun": dryRun, "Execution results": executionResults, "ok": 1});
       printIfVerbose("\nScript execution is now complete");        
     } catch (err) {
       printjson({"Script execution failure": err, "ok": 0});

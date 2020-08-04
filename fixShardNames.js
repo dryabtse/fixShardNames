@@ -145,7 +145,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     function fixChunks(oldId, newId) {
       print("Updating config.chunks...");
       // this could potentially update a great number of documents
-      const ret = db.chunks.update({"shard": oldId}, {"$set": {"shard": newId}}, {multi: true, writeConcern: { w: "majority", wtimeout: 5000 }});
+      const ret = db.chunks.update({"shard": oldId}, {"$set": {"shard": newId}}, {multi: true, writeConcern: { w: "majority", wtimeout: 30000 }});
       assert(ret, "Chunk documents could not be updated:  \n shardId: " + oldId + "ret: " + ret);
       assert(ret.hasOwnProperty("nMatched"), "The nRemoved field is not present in the resulting document");
       assert(ret.hasOwnProperty("nUpserted"), "The nUpserted field is not present in the resulting document");
@@ -207,7 +207,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
       });
 
       printjson({"dryRun": dryRun, "Execution results": executionResults, "ok": 1});
-      printIfVerbose("\nScript execution is now complete");        
+      printIfVerbose("Script execution is now complete");        
     } catch (err) {
       printjson({"Script execution failure": err, "ok": 0});
     };

@@ -33,7 +33,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     };
 
     function detectDryRun() {
-      if (dryRun == true) print("The script is running in dry run mode. No modifications will be done to the metadata");
+      if (dryRun == true) printIfVerbose("The script is running in dry run mode. No modifications will be done to the metadata");
     };
 
     function runPreFlightChecks() {
@@ -128,7 +128,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     };
     
     function fixDatabases(oldId, newId) {
-      print("Updating config.databases...");
+      printIfVerbose("Updating config.databases...");
       const ret = db.databases.update({"primary": oldId}, {"$set": {"primary": newId}}, {multi: true, writeConcern: { w: "majority", wtimeout: 5000 }});
       assert(ret, "Shard document could not be updated:  \n shardId: " + oldId + " ret: " + ret);
       assert(ret.hasOwnProperty("nMatched"), "The nRemoved field is not present in the resulting document");
@@ -143,7 +143,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     };
     
     function fixChunks(oldId, newId) {
-      print("Updating config.chunks...");
+      printIfVerbose("Updating config.chunks...");
       // this could potentially update a great number of documents
       const ret = db.chunks.update({"shard": oldId}, {"$set": {"shard": newId}}, {multi: true, writeConcern: { w: "majority", wtimeout: 30000 }});
       assert(ret, "Chunk documents could not be updated:  \n shardId: " + oldId + "ret: " + ret);
@@ -154,7 +154,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
       assert.eq(0, ret.nUpserted, "Updating chunk documents resulted into an upsert: \n shardId: " + oldId + "ret: " + ret);
       assert.eq(ret.nMatched, ret.nModified, "Not all of the matched chunk documents got updated: \n shardId: " + oldId + "ret: " + ret);
       printIfVerbose(ret);
-      print("Done updating config.chunks");
+      printIfVerbose("Done updating config.chunks");
     };
     
     function fix(shardDoc) {

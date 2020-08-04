@@ -24,6 +24,10 @@
 //   fixShardNames("configCopy");
 //   fixShardNames("configCopy", false);
 //   fixShardNames("configCopy", false, true);
+//
+// WARNING: If script execution fails with dryRyn set to 'false', it could leave the metadata in an 
+//          inconsistent state so a fresh CSRS restore would be needed for the script execution to 
+//          be attempted again
 
 var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
 

@@ -1,3 +1,30 @@
+// ================
+// fixShardNames.js 
+// ================
+//
+// The purpose of this script is to:
+//   - identify mismatches between shard names (shard id) and the corresponding replica set name
+//   - update the sharded cluster metadata to have shard name to be matching the replica set name
+//
+// Arguments:
+//   dbName - String, name of the database that contains the metadata. It is meant to be "config", 
+//            but can be specified to a custom value for testing purposes
+//   dryRun - Boolean, if set to true (default) the script will not make any changes
+//   verbose - Boolean, if set to false (default) suppresses extra output produced by the script
+//
+// Prerquisites:
+//   - it is expected that there are no writes happenning to the metadata 
+//   - it is expected that the script is executed directly on a CSRS node
+//   - it is expected that the CSRS node is running with sharding disabled
+//   - the script assumes that either no authentication is enabled or that the user has sufficient 
+//     priviliges necessary for the script execution
+//   - the script was not evaluated against MongoDB v4.4 or newer
+//
+// Sample usage:
+//   fixShardNames("configCopy");
+//   fixShardNames("configCopy", false);
+//   fixShardNames("configCopy", false, true);
+
 var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
 
     function printIfVerbose(arg) {
@@ -159,6 +186,8 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
         return ret;
     };
 
+// Main section
+
     try {
       runPreFlightChecks();
       detectDryRun();
@@ -175,6 +204,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
         res = fix(s);
         executionResults.push(res);
       });
+
       printjson({"Execution results": executionResults});
       print("\nScript execution is now complete");        
     } catch (err) {

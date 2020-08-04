@@ -37,12 +37,12 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     };
 
     function runPreFlightChecks() {
-      print("Running pre-flight checks");
+      printIfVerbose("Running pre-flight checks");
       checkIfDbExists(dbName);
       checkIfMongos();
       checkIfLiveCSRS();
       checkServerVersion();
-      print("Pre-flight checks completed successfully");
+      printIfVerbose("Pre-flight checks completed successfully");
     };
 
     function checkIfDbExists(dbName) {
@@ -120,11 +120,11 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
     };
 
     function fixShards(oldId, newDoc) {
-      print("Updating config.shards...");
+      printIfVerbose("Updating config.shards...");
       assert.neq(oldId, newDoc._id, "New shard Id should be different from the old shard Id");
       removeShard(oldId);
       insertShard(newDoc);
-      print("Done updating config.shards");
+      printIfVerbose("Done updating config.shards");
     };
     
     function fixDatabases(oldId, newId) {
@@ -139,7 +139,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
       assert.eq(0, ret.nUpserted, "Updating shard documents resulted into an upsert: \n shardId: " + oldId + " ret: " + ret);
       assert.eq(ret.nMatched, ret.nModified, "Not all of the matched database documents got updated: \n shardId: " + oldId + " ret: " + ret);;
       printIfVerbose(ret);
-      print("Done updating config.databases");
+      printIfVerbose("Done updating config.databases");
     };
     
     function fixChunks(oldId, newId) {
@@ -170,9 +170,9 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
         // We only need to modify the metadata if the shard Id does not match repl set Id
         if (newShardId != oldShardId) {
             ret.needsFixing = true;
-            print("Shard " + oldShardId + " does not match its replica set name " + newShardId);
+            printIfVerbose("Shard " + oldShardId + " does not match its replica set name " + newShardId);
             const docsToFix = countShardIdDocs(oldShardId);
-            print("This metadata has " + docsToFix + " documents with old " + oldShardId + " shard id that need to be updated");
+            printIfVerbose("This metadata has " + docsToFix + " documents with old " + oldShardId + " shard id that need to be updated");
             if (dryRun === false) {
               fixShards(oldShardId, shardDoc);
               fixDatabases(oldShardId, newShardId);
@@ -180,6 +180,7 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
               const docsNotFixed = countShardIdDocs(oldShardId); // this is expected to be zero
               assert.eq(0, docsNotFixed, "Could not do all of the modifications");
               ret.fixed = true;
+              ret.docsUpdated = docsToFix;
             };
         };
 
@@ -205,9 +206,9 @@ var fixShardNames = function(dbName="config", dryRun=true, verbose=false) {
         executionResults.push(res);
       });
 
-      printjson({"Execution results": executionResults});
-      print("\nScript execution is now complete");        
+      printjson({"Execution results": executionResults, "ok": 1});
+      printIfVerbose("\nScript execution is now complete");        
     } catch (err) {
-      print("Something went wrong: " + err);
+      printjson({"Script execution failure": err, "ok": 0});
     };
 };
